@@ -1,4 +1,5 @@
-from os import system, listdir
+from os import system
+import pathlib
 
 class CLIGravidade:
   script_gravidade = "./gravidade"
@@ -9,19 +10,26 @@ class CLIGravidade:
     system(f'{self.script_gravidade} {modo} {arg}')
   
   def sorteio (self, arg):
-    self.rodar('-s', self.dir_presets + arg)
+    self.rodar('-s', arg)
   
   def sorteio_salvar (self, arg):
-    self.rodar('-sv', self.dir_presets + arg)
+    self.rodar('-sv', arg)
   
   def vi (self, arg):
-    self.rodar('-vi', self.dir_presets + arg)
+    self.rodar('-vi', arg)
 
   def exibir (self, arg):
-    self.rodar('-e', self.dir_data + arg)
+    self.rodar('-e', arg)
+
+  def listar_arquivos_R (self, dir):
+    lista = [
+      item.as_posix() for item in pathlib.Path(dir).rglob("*")
+      if not item.is_dir()
+    ]
+    return lista
 
   def listar_presets (self):
-    return listdir(self.dir_presets)
+    return self.listar_arquivos_R(self.dir_presets)
 
   def filtrar_arquivos (self, tipo:str):
     # Lista os presets
@@ -29,7 +37,7 @@ class CLIGravidade:
     # Agora filtra por tipo
     presets_tipo = []
     for arquivo in arquivos_preset:
-      with open(f"{self.dir_presets}/{arquivo}", 'r') as arq:
+      with open(arquivo, 'r') as arq:
         linhas = arq.read().split('\n')
         # O modo esta na segunda linha
         modo = linhas[1].split()[1]
@@ -44,4 +52,4 @@ class CLIGravidade:
     return self.filtrar_arquivos('vi')
 
   def listar_data (self):
-    return listdir(self.dir_data)
+    return self.listar_arquivos_R(self.dir_data)
